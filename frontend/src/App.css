@@ -1,0 +1,531 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap');
+
+:root {
+  --bg: #eff0f3;
+  --headline: #0d0d0d;
+  --paragraph: #2a2a2a;
+  --btn: #ff8e3c;
+  --btn-text: #0d0d0d;
+  --stroke: #0d0d0d;
+  --main: #eff0f3;
+  --secondary: #fffffe;
+  --highlight: #ff8e3c;
+  --tertiary: #d9376e;
+}
+
+#root, body, html {
+  border: none !important;
+  outline: none !important;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  color: var(--paragraph);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--headline);
+  margin: 0;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background-color: var(--secondary);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  color: var(--headline);
+  letter-spacing: 1px;
+}
+
+.logo svg {
+  width: 28px;
+  fill: var(--tertiary);
+}
+
+main {
+  display: grid;
+  grid-template-columns: 350px 1fr 300px;
+  gap: 25px;
+  padding: 0 30px 30px 30px;
+  max-width: 1600px;
+  margin: 0 auto;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.panel {
+  background-color: var(--secondary);
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  background-color: var(--main);
+  border-bottom: 1px solid #e0e0e0;
+  padding: 15px 20px;
+  font-weight: 700;
+  color: var(--headline);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.config-body, .grid-body {
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--headline);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  background-color: var(--secondary);
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  color: var(--headline);
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+  transition: all 0.2s;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--btn);
+  box-shadow: 0 0 0 4px rgba(255, 142, 60, 0.1);
+}
+
+input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.btn {
+  width: 100%;
+  padding: 14px 20px;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: var(--btn);
+  color: var(--btn-text);
+}
+
+.btn-success {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: #bae6fd;
+}
+
+.btn-danger {
+  background-color: #fecdd3;
+  color: #be123c;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #fda4af;
+}
+
+.divider {
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 10px 0;
+}
+
+.stats-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.stat-box {
+  flex: 1;
+  background-color: var(--secondary);
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--headline);
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--paragraph);
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-top: 5px;
+}
+
+#numbersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
+  gap: 12px;
+}
+
+.num-cell {
+  aspect-ratio: 1;
+  background-color: var(--secondary);
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.num-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--headline);
+}
+
+.num-user {
+  font-size: 10px;
+  color: var(--paragraph);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 90%;
+  text-align: center;
+  margin-top: 2px;
+}
+
+.num-cell.taken {
+  background-color: #ffe4d1;
+  border-color: #ffb17a;
+}
+
+.num-cell.taken .num-value, .num-cell.taken .num-user {
+  color: #b1561c;
+}
+
+.num-cell.winner {
+  background-color: #fbcfe8;
+  border-color: #f472b6;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0px rgba(244, 114, 182, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(244, 114, 182, 0); }
+  100% { box-shadow: 0 0 0 0px rgba(244, 114, 182, 0); }
+}
+
+#chatLog {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: #f9fafb;
+}
+
+.chat-msg {
+  font-size: 13px;
+  padding: 10px 14px;
+  background-color: var(--secondary);
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  line-height: 1.4;
+}
+
+.chat-msg.highlight {
+  background-color: #ffe4d1;
+  border-color: #ffb17a;
+}
+
+.chat-msg .user {
+  font-weight: 700;
+  color: var(--headline);
+  margin-right: 5px;
+}
+
+.chat-msg .text {
+  color: var(--paragraph);
+}
+
+.chat-msg .timestamp {
+  font-size: 10px;
+  color: var(--paragraph);
+  opacity: 0.6;
+  float: right;
+  margin-top: 2px;
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--secondary);
+  border: 1px solid #e0e0e0;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--headline);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #9ca3af;
+}
+
+.status-pill.connected .status-dot {
+  background-color: var(--tertiary);
+}
+
+.badge {
+  background-color: #ffe4d1;
+  color: #b1561c;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* =========================================
+   NOVOS EFEITOS DA ROLETA (MODAL VENCEDOR)
+   ========================================= */
+
+#winnerModal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0,0,0,0.7);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.winner-card {
+  background-color: var(--secondary);
+  border: none;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 850px;
+  padding: 50px 40px;
+  text-align: center;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.case-header {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  color: var(--headline);
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+}
+
+.case-container {
+  position: relative;
+  background-color: #f3f4f6;
+  border: 2px solid #d1d5db;
+  height: 170px;
+  overflow: hidden;
+  border-radius: 12px;
+  margin-bottom: 40px;
+  box-shadow: inset 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.case-track {
+  display: flex;
+  height: 100%;
+  will-change: transform;
+}
+
+.case-item {
+  min-width: 140px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-right: 1px solid #d1d5db;
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--headline);
+  background-color: var(--secondary);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efeito elástico suave */
+}
+
+.case-item span {
+  font-size: 14px;
+  color: var(--paragraph);
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+/* Efeito de Dimming: Escurece perdedores quando termina */
+.case-track.finished .case-item:not(.winner-item) {
+  opacity: 0.2;
+  filter: grayscale(100%);
+  transform: scale(0.95);
+}
+
+/* Efeito de Brilho: Destaca o vencedor */
+.case-track.finished .case-item.winner-item {
+  background-color: #fff0e6;
+  border-color: var(--highlight);
+  box-shadow: inset 0 0 30px rgba(255, 142, 60, 0.2);
+  transform: scale(1.08);
+  z-index: 5;
+  color: var(--highlight);
+}
+
+/* Ponteiro Estilo CS Realista */
+.case-pointer {
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: 50%;
+  width: 4px;
+  background-color: var(--tertiary);
+  transform: translateX(-50%);
+  border-radius: 4px;
+  z-index: 10;
+  box-shadow: 0 0 12px var(--tertiary);
+}
+
+/* Triângulos do Ponteiro */
+.case-pointer::before, .case-pointer::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+}
+.case-pointer::before {
+  top: 0;
+  border-top: 18px solid var(--tertiary);
+}
+.case-pointer::after {
+  bottom: 0;
+  border-bottom: 18px solid var(--tertiary);
+}
+
+/* Vibração do Ponteiro enquanto gira */
+.case-pointer.ticking {
+  animation: pointerVibrate 0.08s infinite;
+}
+
+@keyframes pointerVibrate {
+  0% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-4px); }
+  100% { transform: translateX(-50%) translateY(0); }
+}
+
+/* Animação do Resultado Final */
+.winner-result {
+  animation: bounceIn 0.8s cubic-bezier(0.2, 1.3, 0.3, 1) forwards;
+}
+
+.winner-crown {
+  font-size: 65px;
+  margin-bottom: 15px;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+}
+
+.winner-number {
+  font-size: 100px;
+  font-family: 'Bebas Neue', sans-serif;
+  color: var(--tertiary);
+  line-height: 1;
+  text-shadow: 0 4px 15px rgba(217, 55, 110, 0.2);
+}
+
+.winner-name {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--headline);
+  margin: 15px 0;
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
