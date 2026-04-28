@@ -57,18 +57,6 @@ header {
   fill: var(--tertiary);
 }
 
-main {
-  display: grid;
-  grid-template-columns: 350px 1fr 300px;
-  gap: 25px;
-  padding: 0 30px 30px 30px;
-  max-width: 1600px;
-  margin: 0 auto;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-}
-
 .panel {
   background-color: var(--secondary);
   border: 1px solid #e0e0e0 !important;
@@ -77,6 +65,7 @@ main {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  height: fit-content;
 }
 
 .panel-header {
@@ -295,6 +284,7 @@ input:disabled {
   flex-direction: column;
   gap: 12px;
   background-color: #f9fafb;
+  max-height: 600px;
 }
 
 .chat-msg {
@@ -319,14 +309,6 @@ input:disabled {
 
 .chat-msg .text {
   color: var(--paragraph);
-}
-
-.chat-msg .timestamp {
-  font-size: 10px;
-  color: var(--paragraph);
-  opacity: 0.6;
-  float: right;
-  margin-top: 2px;
 }
 
 .status-pill {
@@ -364,7 +346,7 @@ input:disabled {
 }
 
 /* =========================================
-   NOVOS EFEITOS DA ROLETA (MODAL VENCEDOR)
+   MODAL VENCEDOR (ANIMAÇÕES)
    ========================================= */
 
 #winnerModal {
@@ -428,7 +410,7 @@ input:disabled {
   font-weight: 800;
   color: var(--headline);
   background-color: var(--secondary);
-  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efeito elástico suave */
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .case-item span {
@@ -438,14 +420,12 @@ input:disabled {
   font-weight: 600;
 }
 
-/* Efeito de Dimming: Escurece perdedores quando termina */
 .case-track.finished .case-item:not(.winner-item) {
   opacity: 0.2;
   filter: grayscale(100%);
   transform: scale(0.95);
 }
 
-/* Efeito de Brilho: Destaca o vencedor */
 .case-track.finished .case-item.winner-item {
   background-color: #fff0e6;
   border-color: var(--highlight);
@@ -455,7 +435,6 @@ input:disabled {
   color: var(--highlight);
 }
 
-/* Ponteiro Estilo CS Realista */
 .case-pointer {
   position: absolute;
   top: -5px;
@@ -469,7 +448,6 @@ input:disabled {
   box-shadow: 0 0 12px var(--tertiary);
 }
 
-/* Triângulos do Ponteiro */
 .case-pointer::before, .case-pointer::after {
   content: '';
   position: absolute;
@@ -487,7 +465,6 @@ input:disabled {
   border-bottom: 18px solid var(--tertiary);
 }
 
-/* Vibração do Ponteiro enquanto gira */
 .case-pointer.ticking {
   animation: pointerVibrate 0.08s infinite;
 }
@@ -498,7 +475,6 @@ input:disabled {
   100% { transform: translateX(-50%) translateY(0); }
 }
 
-/* Animação do Resultado Final */
 .winner-result {
   animation: bounceIn 0.8s cubic-bezier(0.2, 1.3, 0.3, 1) forwards;
 }
@@ -528,4 +504,66 @@ input:disabled {
   0% { transform: scale(0.5); opacity: 0; }
   60% { transform: scale(1.05); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
+}
+
+/* =========================================
+   LAYOUT GLOBAL RESPONSIVO (ÁREA CENTRAL AMPLIADA)
+   ========================================= */
+.layout-container {
+  display: flex;
+  justify-content: center;
+  gap: 15px; 
+  width: 100%;
+  min-height: 100vh;
+  padding: 15px; 
+  box-sizing: border-box;
+  overflow-x: hidden; 
+}
+
+.ad-sidebar {
+  width: 160px; 
+  flex-shrink: 0;
+  display: none; 
+}
+
+.app-content {
+  flex: 1;
+  max-width: 70%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 1400px) {
+  .ad-sidebar {
+    display: block;
+  }
+}
+
+main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px; 
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.full-width-panel {
+  width: 100%;
+}
+
+.panel-config {
+  width: 300px; 
+  flex-shrink: 0;
+}
+
+.panel-grid {
+  flex: 1; 
+  min-width: 500px; 
+}
+
+.panel-chat {
+  width: 280px; 
+  flex-shrink: 0;
 }

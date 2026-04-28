@@ -1,34 +1,52 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
+// const pool = new Pool({
+//   user: process.env.DB_USER,
+//   password: process.env.DB_PASSWORD,
+//   host: process.env.DB_HOST,
+//   port: process.env.DB_PORT,
+//   database: process.env.DB_NAME,
+// });
+
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production'
+    ? { rejectUnauthorized: false }
+    : false
 });
 
-// Criação da tabela (se não existir)
 const initDB = async () => {
-  const queryText = `
+  const createTableQuery = `
     CREATE TABLE IF NOT EXISTS raffles (
       id UUID PRIMARY KEY,
       channel VARCHAR(255) NOT NULL,
+      title VARCHAR(255) DEFAULT 'Novo Sorteio',
+      item_image VARCHAR(1000) DEFAULT '',
       min_num INT DEFAULT 1,
       max_num INT DEFAULT 50,
       command VARCHAR(50) DEFAULT '!numero',
-      item_image VARCHAR(1000) DEFAULT '', -- NOVO: Guarda o link da imagem do prêmio
       entries JSONB DEFAULT '{}',
       winner JSONB DEFAULT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
   `;
+
+  // Adiciona as novas colunas para a funcionalidade de Subs
+  const updateTableQuery = `
+    ALTER TABLE raffles ADD COLUMN IF NOT EXISTS title VARCHAR(255) DEFAULT 'Novo Sorteio';
+    ALTER TABLE raffles ADD COLUMN IF NOT EXISTS item_image VARCHAR(1000) DEFAULT '';
+    ALTER TABLE raffles ADD COLUMN IF NOT EXISTS target_audience VARCHAR(50) DEFAULT 'all';
+    ALTER TABLE raffles ADD COLUMN IF NOT EXISTS sub_multiplier INT DEFAULT 2;
+    ALTER TABLE raffles ADD COLUMN IF NOT EXISTS sub_list JSONB DEFAULT '[]';
+  `;
+
   try {
-    await pool.query(queryText);
-    console.log('✅ Tabela "raffles" verificada/criada com sucesso.');
+    await pool.query(createTableQuery);
+    await pool.query(updateTableQuery);
+    console.log('✅ Tabela raffles verificada e atualizada com sucesso (Suporte a Subs)!');
   } catch (err) {
-    console.error('❌ Erro ao criar tabela:', err);
+    console.error('❌ Erro ao configurar banco de dados:', err);
   }
 };
 

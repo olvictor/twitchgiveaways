@@ -45,22 +45,19 @@ app.get('/api/auth/twitch', (req, res) => {
 // 2. A Twitch devolve o usuário para cá com um "código"
 app.get('/api/auth/twitch/callback', async (req, res) => {
   const { code } = req.query;
-
   try {
-    // Troca o código por um Token de Acesso da Twitch
     const tokenResponse = await axios.post('https://id.twitch.tv/oauth2/token', null, {
       params: {
         client_id: process.env.TWITCH_CLIENT_ID,
         client_secret: process.env.TWITCH_CLIENT_SECRET,
         code,
         grant_type: 'authorization_code',
-        redirect_uri: process.env.TWITCH_REDIRECT_URI,
+        redirect_uri: 'http://localhost:3001/api/auth/twitch/callback',
       },
     });
 
     const accessToken = tokenResponse.data.access_token;
 
-    // Busca os dados do perfil do usuário na Twitch
     const userResponse = await axios.get('https://api.twitch.tv/helix/users', {
       headers: {
         'Client-ID': process.env.TWITCH_CLIENT_ID,
@@ -70,22 +67,20 @@ app.get('/api/auth/twitch/callback', async (req, res) => {
 
     const twitchUser = userResponse.data.data[0];
 
-    // Cria um token JWT nosso para manter o usuário logado no React
     const userToken = jwt.sign(
       { id: twitchUser.id, username: twitchUser.login, display_name: twitchUser.display_name, profile_image: twitchUser.profile_image_url },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' } // Expira em 7 dias
+      { expiresIn: '7d' } 
     );
 
-    // Redireciona de volta pro React passando o token na URL
-    res.redirect(`${process.env.FRONTEND_URL}/?token=${userToken}`);
-
+    // O redirecionamento final com a URL do React cravada no código
+    res.redirect(`http://localhost:5173/?token=${userToken}`);
+    
   } catch (error) {
     console.error('Erro na autenticação com a Twitch:', error);
-    res.redirect(`${process.env.FRONTEND_URL}/?error=auth_failed`);
+    res.redirect(`http://localhost:5173/?error=auth_failed`);
   }
 });
-
 
 // --- ROTAS REST (Express) ---
 
@@ -158,19 +153,32 @@ io.on('connection', (socket) => {
   });
 
   // Admin envia uma atualização (novo número, configuração alterada, vencedor sorteado)
-  socket.on('admin_update', async (data) => {
-  const { id, channel, title, minNum, maxNum, command, entries, winner, itemImage } = data;
+ socket.on('admin_update', async (data) => {
+    const { id, channel, title, minNum, maxNum, command, entries, winner, itemImage, targetAudience, subMultiplier, subList } = data;
 
-  try {
+    try {
       await pool.query(
         `UPDATE raffles 
-        SET channel = $1, title = $2, min_num = $3, max_num = $4, command = $5, entries = $6, winner = $7, item_image = $8 
-        WHERE id = $9`,
-        [channel, title || 'Novo Sorteio', minNum, maxNum, command, JSON.stringify(entries), winner ? JSON.stringify(winner) : null, itemImage || '', id]
+         SET channel = $1, title = $2, min_num = $3, max_num = $4, command = $5, entries = $6, winner = $7, item_image = $8, target_audience = $9, sub_multiplier = $10, sub_list = $11
+         WHERE id = $12`,
+        [
+          channel, 
+          title || 'Novo Sorteio', 
+          minNum, 
+          maxNum, 
+          command, 
+          JSON.stringify(entries), 
+          winner ? JSON.stringify(winner) : null, 
+          itemImage || '', 
+          targetAudience || 'all',
+          subMultiplier || 2,
+          JSON.stringify(subList || []),
+          id
+        ]
       );
 
       socket.to(id).emit('viewer_update', {
-        channel, title, minNum, maxNum, command, entries, winner, itemImage
+        channel, title, minNum, maxNum, command, entries, winner, itemImage, targetAudience, subMultiplier
       });
     } catch (error) {
       console.error('Erro ao atualizar banco via socket:', error);
@@ -183,7 +191,7 @@ io.on('connection', (socket) => {
 });
 
 // --- INICIANDO SERVIDOR ---
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
