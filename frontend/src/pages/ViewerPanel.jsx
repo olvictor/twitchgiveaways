@@ -164,7 +164,7 @@ export default function ViewerPanel() {
               </div>
             )}
 
-            <div className="panel-header">🎯 Números do Sorteio <span className="badge">{takenCount} escolhidos</span></div>
+            <div className="panel-header"> Números do Sorteio <span className="badge">{takenCount} escolhidos</span></div>
             <div className="grid-body">
               {targetAudience === 'subs' && <div style={{ backgroundColor: '#e0f2fe', color: '#0369a1', padding: '10px', borderRadius: '8px', textAlign: 'center', fontWeight: '700', fontSize: '13px', marginBottom: '10px' }}>🔒 ESTE SORTEIO É EXCLUSIVO PARA INSCRITOS (SUBS)</div>}
               {targetAudience === 'sub_bonus' && <div style={{ backgroundColor: '#fce7f3', color: '#be185d', padding: '10px', borderRadius: '8px', textAlign: 'center', fontWeight: '700', fontSize: '13px', marginBottom: '10px' }}>🎁 SUBS TÊM {subMultiplier}X MAIS CHANCES DE GANHAR!</div>}
@@ -206,11 +206,10 @@ export default function ViewerPanel() {
       <aside className="ad-sidebar"><AdBlock slot="ADS_DIREITA" /></aside>
 
       {showModal && (
-        <div id="winnerModal">
-          <div className="winner-card">
+       <div id="winnerModal">
+          <div className="winner-card" style={{ height: '80vh', maxHeight: '80vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             
-            {/* VÍDEO DO SORTEIO NA ABERTURA AQUI TAMBÉM */}
-            <video ref={videoRef} className="modal-video" src="/caramelo.mp4"  playsInline={true} />
+            <video ref={videoRef} className="modal-video" src="/caramelo.mp4" playsInline={true} />
 
             <div className="case-header">🎁 Abrindo caixa...</div>
             <div className="case-container">

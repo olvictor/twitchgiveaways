@@ -21,7 +21,8 @@ export default function AdBlock({ client = "ca-pub-SEU_CODIGO_AQUI", slot = "123
       alignItems: 'center', 
       justifyContent: 'center', 
       flexDirection: 'column',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      display: 'none'
     }}>
       <span style={{ fontSize: '10px', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>
         Publicidade
