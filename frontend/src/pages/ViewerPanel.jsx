@@ -211,7 +211,7 @@ export default function ViewerPanel() {
             
             <video ref={videoRef} className="modal-video" src="/caramelo.mp4" playsInline={true} />
 
-            <div className="case-header">🎁 Abrindo caixa...</div>
+            <div className="case-header">🎁 Sorteando...</div>
             <div className="case-container">
               {/* O TEMPO DE ANIMAÇÃO 13s */}
               <div className={`case-track ${showResult ? 'finished' : ''}`} style={{ transform: `translateX(${trackOffset})`, transition: isTransitioning ? 'transform 13s cubic-bezier(0.1, 0, 0.1, 1)' : 'none' }}>
