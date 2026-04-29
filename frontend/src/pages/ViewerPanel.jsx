@@ -47,7 +47,7 @@ export default function ViewerPanel() {
 
   // CONEXÃO COM O BACKEND (Para dados do sorteio)
   useEffect(() => {
-    const socket = io('http://localhost:3001');
+    const socket = io('https://twitchgiveaways-production-562e.up.railway.app');
     socket.emit('join_raffle', id);
 
     const updateUI = (data) => {
@@ -73,7 +73,7 @@ export default function ViewerPanel() {
       }
     };
 
-    fetch(`http://localhost:3001/api/raffles/${id}`).then(r => r.json()).then(updateUI);
+    fetch(`https://twitchgiveaways-production-562e.up.railway.app/api/raffles/${id}`).then(r => r.json()).then(updateUI);
     socket.on('viewer_update', updateUI);
     return () => socket.disconnect();
   }, [id]);

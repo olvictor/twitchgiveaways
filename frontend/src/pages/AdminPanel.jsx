@@ -64,10 +64,10 @@ export default function AdminPanel() {
       loggedUser = JSON.parse(atob(payloadBase64));
     } catch (e) { navigate('/'); return; }
 
-    socketBackend.current = io('http://localhost:3001');
+    socketBackend.current = io('https://twitchgiveaways-production-562e.up.railway.app');
     socketBackend.current.emit('join_raffle', id);
 
-    fetch(`http://localhost:3001/api/raffles/${id}`)
+    fetch(`https://twitchgiveaways-production-562e.up.railway.app/api/raffles/${id}`)
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data && !data.error) {

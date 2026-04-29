@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import AdBlock from '../components/AdBlock';
 
-// URL centralizada! Se o link do Railway mudar, você só altera aqui.
+// URL centralizada! 
 const BACKEND_URL = 'https://twitchgiveaways-production-562e.up.railway.app';
 
 export default function Home() {
