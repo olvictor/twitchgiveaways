@@ -1,12 +1,16 @@
 const { Pool } = require('pg');
 require('dotenv').config();
-console.log("DATABASE_URL exists?", !!process.env.DATABASE_URL);
+console.log("PGHOST:", process.env.PGHOST);
+console.log("DATABASE_URL:", !!process.env.DATABASE_URL);
+
 // CONFIGURAÇÃO PARA O RAILWAY (PRODUÇÃO)
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  host: process.env.PGHOST,
+  port: process.env.PGPORT,
+  user: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
+  database: process.env.PGDATABASE,
+  ssl: { rejectUnauthorized: false }
 });
 
 const initDB = async () => {
