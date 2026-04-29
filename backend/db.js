@@ -1,5 +1,5 @@
 const { Pool } = require('pg');
-require('dotenv').config();
+
 console.log("PGHOST:", process.env.PGHOST);
 console.log("DATABASE_URL:", !!process.env.DATABASE_URL);
 
