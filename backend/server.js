@@ -74,11 +74,11 @@ app.get('/api/auth/twitch/callback', async (req, res) => {
     );
 
     // O redirecionamento final com a URL do React cravada no código
-    res.redirect(`http://https://twitchgiveaways-production.up.railway.app//?token=${userToken}`);
+    res.redirect(`http://https://twitchgiveaways-production.up.railway.app/?token=${userToken}`);
     
   } catch (error) {
     console.error('Erro na autenticação com a Twitch:', error);
-    res.redirect(`http://https://twitchgiveaways-production.up.railway.app//?error=auth_failed`);
+    res.redirect(`https://twitchgiveaways-production.up.railway.app//?error=auth_failed`);
   }
 });
 
