@@ -1,6 +1,5 @@
 const { Pool } = require('pg');
 
-console.log("PGHOST:", process.env.PGHOST);
 console.log("DATABASE_URL:", !!process.env.DATABASE_URL);
 
 // CONFIGURAÇÃO PARA O RAILWAY (PRODUÇÃO)

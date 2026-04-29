@@ -16,7 +16,7 @@ const server = http.createServer(app);
 // Configuração do Socket.io permitindo o frontend conectar
 const io = new Server(server, {
   cors: {
-    origin: 'https://twitchgiveaways-production.up.railway.app/', // Em produção, coloque a URL do seu frontend (ex: http://localhost:5173)
+    origin: 'https://twitchgiveaways-production.up.railway.app/', // Em produção, coloque a URL do seu frontend (ex: http://lhttps://twitchgiveaways-production.up.railway.app/)
     methods: ['GET', 'POST'],
   },
 });
@@ -52,7 +52,7 @@ app.get('/api/auth/twitch/callback', async (req, res) => {
         client_secret: process.env.TWITCH_CLIENT_SECRET,
         code,
         grant_type: 'authorization_code',
-        redirect_uri: 'http://localhost:3001/api/auth/twitch/callback',
+        redirect_uri: process.env.TWITCH_REDIRECT_URI,
       },
     });
 
@@ -74,11 +74,11 @@ app.get('/api/auth/twitch/callback', async (req, res) => {
     );
 
     // O redirecionamento final com a URL do React cravada no código
-    res.redirect(`http://localhost:5173/?token=${userToken}`);
+    res.redirect(`http://lhttps://twitchgiveaways-production.up.railway.app//?token=${userToken}`);
     
   } catch (error) {
     console.error('Erro na autenticação com a Twitch:', error);
-    res.redirect(`http://localhost:5173/?error=auth_failed`);
+    res.redirect(`http://lhttps://twitchgiveaways-production.up.railway.app//?error=auth_failed`);
   }
 });
 
