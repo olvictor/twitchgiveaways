@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import AdBlock from '../components/AdBlock'; // Ajuste o caminho se necessário
+import AdBlock from '../components/AdBlock';
+
+// URL centralizada! Se o link do Railway mudar, você só altera aqui.
+const BACKEND_URL = 'https://twitchgiveaways-production-562e.up.railway.app';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -34,7 +37,7 @@ export default function Home() {
 
   const fetchMyRaffles = async (token) => {
     try {
-      const response = await fetch('https://twitchgiveaways-production.up.railway.app/api/raffles/user/me', {
+      const response = await fetch(`${BACKEND_URL}/api/raffles/user/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
@@ -46,15 +49,22 @@ export default function Home() {
     }
   };
 
-  const loginComTwitch = () => window.location.href = 'https://twitchgiveaways-production-562e.up.railway.app/api/auth/twitch';
-  const logout = () => { localStorage.removeItem('twitch_token'); setUser(null); setMyRaffles([]); };
+  const loginComTwitch = () => {
+    window.location.href = `${BACKEND_URL}/api/auth/twitch`;
+  };
+
+  const logout = () => { 
+    localStorage.removeItem('twitch_token'); 
+    setUser(null); 
+    setMyRaffles([]); 
+  };
 
   const criarSorteio = async () => {
     const token = localStorage.getItem('twitch_token');
     if (!token) return alert("Você precisa estar logado!");
     try {
       const novoId = uuidv4();
-      const response = await fetch('https://twitchgiveaways-production.up.railway.app/api/raffles', {
+      const response = await fetch(`${BACKEND_URL}/api/raffles`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ id: novoId }),
