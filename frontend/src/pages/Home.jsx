@@ -46,7 +46,7 @@ export default function Home() {
     }
   };
 
-  const loginComTwitch = () => window.location.href = 'https://twitchgiveaways-production.up.railway.app/api/auth/twitch';
+  const loginComTwitch = () => window.location.href = 'https://twitchgiveaways-production-562e.up.railway.app/api/auth/twitch';
   const logout = () => { localStorage.removeItem('twitch_token'); setUser(null); setMyRaffles([]); };
 
   const criarSorteio = async () => {
