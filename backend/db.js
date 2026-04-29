@@ -5,12 +5,10 @@ console.log("DATABASE_URL:", !!process.env.DATABASE_URL);
 
 // CONFIGURAÇÃO PARA O RAILWAY (PRODUÇÃO)
 const pool = new Pool({
-  host: process.env.PGHOST,
-  port: process.env.PGPORT,
-  user: process.env.PGUSER,
-  password: process.env.PGPASSWORD,
-  database: process.env.PGDATABASE,
-  ssl: { rejectUnauthorized: false }
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 const initDB = async () => {
