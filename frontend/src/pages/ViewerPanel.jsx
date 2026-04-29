@@ -45,7 +45,6 @@ export default function ViewerPanel() {
 
   const parseSeguro = (v, d) => (v && v !== 'null') ? (typeof v === 'string' ? JSON.parse(v) : v) : d;
 
-  // CONEXÃO COM O BACKEND (Para dados do sorteio)
   useEffect(() => {
     const socket = io('https://twitchgiveaways-production-562e.up.railway.app');
     socket.emit('join_raffle', id);
