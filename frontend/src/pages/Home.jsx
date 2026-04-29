@@ -34,7 +34,7 @@ export default function Home() {
 
   const fetchMyRaffles = async (token) => {
     try {
-      const response = await fetch('http://localhost:3001/api/raffles/user/me', {
+      const response = await fetch('https://twitchgiveaways-production.up.railway.app/api/raffles/user/me', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
@@ -46,7 +46,7 @@ export default function Home() {
     }
   };
 
-  const loginComTwitch = () => window.location.href = 'http://localhost:3001/api/auth/twitch';
+  const loginComTwitch = () => window.location.href = 'https://twitchgiveaways-production.up.railway.app/api/auth/twitch';
   const logout = () => { localStorage.removeItem('twitch_token'); setUser(null); setMyRaffles([]); };
 
   const criarSorteio = async () => {
@@ -54,7 +54,7 @@ export default function Home() {
     if (!token) return alert("Você precisa estar logado!");
     try {
       const novoId = uuidv4();
-      const response = await fetch('http://localhost:3001/api/raffles', {
+      const response = await fetch('https://twitchgiveaways-production.up.railway.app/api/raffles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ id: novoId }),
