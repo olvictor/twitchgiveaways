@@ -316,9 +316,19 @@ export default function AdminPanel() {
   };
 
   const resetRaffle = () => {
-    if (!window.confirm('Tem certeza? Todos os números serão limpos.')) return;
-    entriesRef.current = {}; setEntries({}); subListRef.current = []; setSubList([]);
-    setShowModal(false); setWinner(null); setShowResult(false); setChatLogs([]);
+    if (!window.confirm('Tem certeza? Todos os números serão limpos e o chat será desconectado.')) return;
+    
+    disconnect();
+
+    entriesRef.current = {}; 
+    setEntries({}); 
+    subListRef.current = []; 
+    setSubList([]);
+    setShowModal(false); 
+    setWinner(null); 
+    setShowResult(false); 
+    setChatLogs([]);
+    
     broadcastUpdate({}, null, []);
   };
 
@@ -345,7 +355,7 @@ if (!isOwner) return (
       </h3>
     </div>
   );
-  
+
   const maxParsed = parseInt(maxNum, 10) || 50;
   
   const segurasContagem = typeof entries === 'object' && entries !== null ? entries : {};
