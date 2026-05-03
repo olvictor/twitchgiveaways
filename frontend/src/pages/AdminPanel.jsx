@@ -452,9 +452,9 @@ export default function AdminPanel() {
               <div><label>Comando</label><input type="text" value={command} onChange={(e) => setCommand(e.target.value)} /></div>
               
               <button className={`btn ${connected ? 'btn-danger' : 'btn-primary'}`} onClick={toggleConnect}>{connected ? '■ DESCONECTAR' : '▶ CONECTAR'}</button>
-              <div className="divider"></div>
+              {/* <div className="divider"></div>
               <button className="btn" onClick={simulateChat} style={{ backgroundColor: '#e5e7eb', color: '#374151' }}>🤖 SIMULAR</button>
-              <div className="divider"></div>
+              <div className="divider"></div> */}
               
               <button className="btn btn-success" onClick={drawWinner} disabled={takenCount === 0} style={{ backgroundColor: '#10b981', color: 'white' }}>🎲 SORTEAR</button>
               <button className="btn btn-danger" onClick={resetRaffle}>↺ RESETAR</button>
