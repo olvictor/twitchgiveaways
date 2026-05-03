@@ -366,8 +366,33 @@ export default function AdminPanel() {
       )}
 
       <div className="app-content">
-        <header>
-          <div className="logo"><span className="logo-text">TWITCH SORTEIO ADMIN</span></div>
+        <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            {/* Botão de Voltar para a Home */}
+            <button 
+              onClick={() => navigate('/')} 
+              style={{ 
+                backgroundColor: 'var(--secondary)', 
+                border: '1px solid #dcdcdc', 
+                color: 'var(--headline)', 
+                padding: '6px 12px', 
+                borderRadius: '6px',
+                fontSize: '14px', 
+                cursor: 'pointer',
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '6px',
+                fontWeight: 'bold',
+                fontFamily: 'Inter'
+              }}
+              title="Voltar para a página inicial"
+            >
+              ⬅️ Voltar
+            </button>
+            
+            <div className="logo"><span className="logo-text">TWITCH SORTEIO ADMIN</span></div>
+          </div>
+          
           <div className={`status-pill ${connected ? 'connected' : ''}`}>
             <div className="status-dot"></div><span>{connected ? `#${channel}` : 'Desconectado'}</span>
           </div>
@@ -475,13 +500,12 @@ export default function AdminPanel() {
                     onClick={() => setIsFiltering(true)}
                     style={{ width: 'auto', padding: '6px 16px', fontSize: '12px' }}
                   >
-                    🔍 FILTRAR
+                   FILTRAR
                   </button>
                   
-                  {/* O botão 'Mostrar Todos' só aparece se o filtro estiver ativo */}
                   {isFiltering && (
                     <button 
-                      className="btn btn-danger" 
+                      className="btn" 
                       onClick={() => {
                         setIsFiltering(false);
                         setFilterStart('');
@@ -496,7 +520,6 @@ export default function AdminPanel() {
               </div>
 
               <div id="numbersGrid">
-                {/* Aplicando o filtro antes de mapear os números */}
                 {gridArray.filter(num => {
                   if (!isFiltering) return true;
                   const start = parseInt(filterStart, 10) || 1;
