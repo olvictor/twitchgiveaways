@@ -10,13 +10,13 @@ export default function AdminPanel() {
   const [isOwner, setIsOwner] = useState(false);
   const [channel, setChannel] = useState('');
   const [title, setTitle] = useState('Novo Sorteio');
-  // O número mínimo agora é sempre 1 (removido o useState do minNum)
+  
+  // O número mínimo agora é sempre 1 fixo
   const minNum = 1; 
   const [maxNum, setMaxNum] = useState(50);
   const [command, setCommand] = useState('!numero');
   
   const [itemImage, setItemImage] = useState(''); 
-  
   const [targetAudience, setTargetAudience] = useState('all'); 
   const [subMultiplier, setSubMultiplier] = useState(2);
   const [subList, setSubList] = useState([]);
@@ -42,14 +42,16 @@ export default function AdminPanel() {
   const entriesRef = useRef({}); 
   const subListRef = useRef([]);
   const videoRef = useRef(null); 
-  const isFirstRender = useRef(true); // Ref para evitar o Toast de carregar na primeira vez
+  const isFirstRender = useRef(true); 
 
   const linkPublico = `${window.location.origin}/sorteio/${id}`;
 
+  // 1º useEffect: Rola o chat para baixo quando chega mensagem nova
   useEffect(() => {
     if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
   }, [chatLogs]);
 
+  // 2º useEffect: Ouve a tecla ESC para fechar o Modal
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === 'Escape' && showModal) {
@@ -60,7 +62,6 @@ export default function AdminPanel() {
     return () => window.removeEventListener('keydown', handleEsc);
   }, [showModal]);
 
-  
   const parseSeguro = (valor, valorPadrao) => {
     if (!valor || valor === 'null') return valorPadrao;
     if (typeof valor === 'string') {
@@ -138,7 +139,7 @@ export default function AdminPanel() {
       const timer = setTimeout(() => {
         broadcastUpdate();
         
-        // Evita mostrar o Toast quando a página acabou de carregar os dados do fetch
+        // Evita mostrar o Toast quando a página acabou de carregar do servidor
         if (isFirstRender.current) {
           isFirstRender.current = false;
         } else {
@@ -282,15 +283,30 @@ export default function AdminPanel() {
     setIsSpinning(false);
     setTrackOffset('0px');
     
+    // --- LÓGICA DE SINCRONIZAÇÃO DE VÍDEO ---
     setTimeout(() => {
-      setIsTransitioning(true); setIsSpinning(true); 
-      const offsetCalc = `calc(50% - ${stopIndex * 141 + 70}px)`;
-      setTrackOffset(offsetCalc);
       broadcastUpdate(entriesRef.current, chosenWinner);
 
       if (videoRef.current) {
         videoRef.current.currentTime = 0;
-        videoRef.current.play();
+        
+        // Só dispara a roleta quando o vídeo prometer que começou a tocar
+        const playPromise = videoRef.current.play();
+
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            setIsTransitioning(true); setIsSpinning(true); 
+            const offsetCalc = `calc(50% - ${stopIndex * 141 + 70}px)`;
+            setTrackOffset(offsetCalc);
+          }).catch(error => {
+            console.error("Erro no vídeo, girando roleta mesmo assim:", error);
+            setIsTransitioning(true); setIsSpinning(true); 
+            setTrackOffset(`calc(50% - ${stopIndex * 141 + 70}px)`);
+          });
+        }
+      } else {
+        setIsTransitioning(true); setIsSpinning(true); 
+        setTrackOffset(`calc(50% - ${stopIndex * 141 + 70}px)`);
       }
     }, 50);
 
@@ -332,13 +348,13 @@ export default function AdminPanel() {
     <div className="layout-container">
       <aside className="ad-sidebar"><AdBlock slot="ADS_ESQUERDA" /></aside>
 
-      {/* RENDERIZAÇÃO DO TOAST AQUI */}
+      {/* Pré-carregamento do vídeo escondido na página */}
+      <video src="/caramelo.mp4" preload="auto" style={{ display: 'none' }} />
+
+      {/* RENDERIZAÇÃO DO TOAST AQUI NO CANTO INFERIOR ESQUERDO */}
       {toast.show && (
         <div style={{
-          position: 'fixed', 
-          bottom: '20px', /* Mudou de top para bottom */
-          left: '20px',   /* Mudou de right para left */
-          zIndex: 9999,
+          position: 'fixed', bottom: '20px', left: '20px', zIndex: 9999,
           backgroundColor: '#10b981', color: 'white', padding: '12px 24px',
           borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
           fontWeight: '600', fontFamily: 'Inter', animation: 'fadeIn 0.3s ease'
@@ -346,6 +362,7 @@ export default function AdminPanel() {
           {toast.message}
         </div>
       )}
+
       <div className="app-content">
         <header>
           <div className="logo"><span className="logo-text">TWITCH SORTEIO ADMIN</span></div>
@@ -400,7 +417,6 @@ export default function AdminPanel() {
                 />
               </div>
 
-              {/* INPUT DO MÍNIMO REMOVIDO! Apenas o Máximo ficou aqui */}
               <div>
                 <label>Quantidade de Números (Máx)</label>
                 <input type="number" value={maxNum} onChange={(e) => setMaxNum(e.target.value)} disabled={connected} />
@@ -462,23 +478,23 @@ export default function AdminPanel() {
       </div>
       <aside className="ad-sidebar"><AdBlock slot="ADS_DIREITA" /></aside>
 
-   {showModal && (
+      {/* MODAL MELHORADO (80vh de altura, vídeo seguro, fechamento no esc) */}
+      {showModal && (
         <div 
           id="winnerModal" 
-          onClick={() => setShowModal(false)} // Fecha se clicar na parte escura (fora)
+          onClick={() => setShowModal(false)}
         >
           <div 
             className="winner-card" 
-            onClick={(e) => e.stopPropagation()} // Impede o clique de vazar e fechar o modal ao clicar dentro da caixa branca
+            onClick={(e) => e.stopPropagation()} 
             style={{ 
-              maxHeight: '80vh', // Trava a altura máxima em 80% da tela
-              overflowY: 'auto', // Se os itens passarem, ele cria um scroll automático dentro do card
+              maxHeight: '80vh', 
+              overflowY: 'auto', 
               display: 'flex',
               flexDirection: 'column'
             }}
           >
             
-            {/* Travei a altura máxima do vídeo para garantir que ele não roube todo o espaço */}
             <video 
               ref={videoRef} 
               className="modal-video" 
@@ -496,7 +512,6 @@ export default function AdminPanel() {
               </div>
               <div className={`case-pointer ${isSpinning ? 'ticking' : ''}`}></div>
             </div>
-            
             {showResult && (
               <div className="winner-result">
                 <div className="winner-crown">👑</div>
