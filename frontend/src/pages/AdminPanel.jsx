@@ -10,7 +10,8 @@ export default function AdminPanel() {
   const [isOwner, setIsOwner] = useState(false);
   const [channel, setChannel] = useState('');
   const [title, setTitle] = useState('Novo Sorteio');
-  const [minNum, setMinNum] = useState(1);
+  // O número mínimo agora é sempre 1 (removido o useState do minNum)
+  const minNum = 1; 
   const [maxNum, setMaxNum] = useState(50);
   const [command, setCommand] = useState('!numero');
   
@@ -32,12 +33,16 @@ export default function AdminPanel() {
   const [isSpinning, setIsSpinning] = useState(false); 
   const [showResult, setShowResult] = useState(false);
 
+  // Estado para controlar o Toast (Notificação)
+  const [toast, setToast] = useState({ show: false, message: '' });
+
   const wsTwitch = useRef(null);
   const socketBackend = useRef(null);
   const chatEndRef = useRef(null);
   const entriesRef = useRef({}); 
   const subListRef = useRef([]);
   const videoRef = useRef(null); 
+  const isFirstRender = useRef(true); // Ref para evitar o Toast de carregar na primeira vez
 
   const linkPublico = `${window.location.origin}/sorteio/${id}`;
 
@@ -76,7 +81,6 @@ export default function AdminPanel() {
           setChannel(data.channel);
           
           if (data.title) setTitle(data.title);
-          if (data.min_num) setMinNum(data.min_num);
           if (data.max_num) setMaxNum(data.max_num);
           if (data.command) setCommand(data.command);
           if (data.item_image) setItemImage(data.item_image);
@@ -103,50 +107,36 @@ export default function AdminPanel() {
     };
   }, [id, navigate]);
 
-const broadcastUpdate = async (updatedEntries = entriesRef.current, updatedWinner = winner, updatedSubList = subListRef.current) => {
-    // 1. Atualiza a tela dos espectadores em tempo real via Socket.io
+  const broadcastUpdate = (updatedEntries = entriesRef.current, updatedWinner = winner, updatedSubList = subListRef.current) => {
     if (socketBackend.current) {
       socketBackend.current.emit('admin_update', {
         id, channel, title, minNum, maxNum, command, itemImage, entries: updatedEntries, winner: updatedWinner,
         targetAudience, subMultiplier, subList: updatedSubList
       });
     }
-
-    // 2. Salva as alterações definitivamente no Banco de Dados
-    try {
-      const token = localStorage.getItem('twitch_token');
-      if (!token) return; // Garante que o usuário está logado
-
-      await fetch(`https://twitchgiveaways-production-562e.up.railway.app/api/raffles/${id}`, {
-        method: 'PUT', // Atualiza os dados da rifa existente
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // Envia o token por segurança
-        },
-        body: JSON.stringify({
-          title: title,
-          min_num: parseInt(minNum, 10),
-          max_num: parseInt(maxNum, 10),
-          command: command,
-          item_image: itemImage,
-          target_audience: targetAudience,
-          sub_multiplier: parseInt(subMultiplier, 10),
-          entries: updatedEntries,
-          winner: updatedWinner,
-          sub_list: updatedSubList
-        })
-      });
-    } catch (error) {
-      console.error("Erro ao salvar as configurações no banco de dados:", error);
-    }
   };
 
+  const showToast = (msg) => {
+    setToast({ show: true, message: msg });
+    setTimeout(() => setToast({ show: false, message: '' }), 3000);
+  };
+
+  // Observa mudanças nos inputs e dispara o broadcast com Toast
   useEffect(() => {
     if (isOwner) {
-      const timer = setTimeout(() => broadcastUpdate(), 500);
+      const timer = setTimeout(() => {
+        broadcastUpdate();
+        
+        // Evita mostrar o Toast quando a página acabou de carregar os dados do fetch
+        if (isFirstRender.current) {
+          isFirstRender.current = false;
+        } else {
+          showToast('✅ Configurações salvas!');
+        }
+      }, 500);
       return () => clearTimeout(timer);
     }
-  }, [title, minNum, maxNum, command, itemImage, targetAudience, subMultiplier, isOwner]);
+  }, [title, maxNum, command, itemImage, targetAudience, subMultiplier, isOwner]);
 
   const toggleConnect = () => connected ? disconnect() : connect();
 
@@ -206,10 +196,10 @@ const broadcastUpdate = async (updatedEntries = entriesRef.current, updatedWinne
 
   const registerNumber = (username, number, isSub = false) => {
     const currentEntries = entriesRef.current;
-    const min = parseInt(minNum, 10) || 1, max = parseInt(maxNum, 10) || 50;
+    const max = parseInt(maxNum, 10) || 50;
 
     if (targetAudience === 'subs' && !isSub) return addChat(username, `tentou ${number} ❌ (Apenas Subs)`, false);
-    if (number < min || number > max) return addChat(username, `tentou ${number} (fora do intervalo)`, false);
+    if (number < minNum || number > max) return addChat(username, `tentou ${number} (fora do intervalo)`, false);
     
     const alreadyTakenByUser = Object.entries(currentEntries).find(([, u]) => u.toLowerCase() === username.toLowerCase());
     if (alreadyTakenByUser) return addChat(username, `já escolheu ${alreadyTakenByUser[0]}`, false);
@@ -233,9 +223,9 @@ const broadcastUpdate = async (updatedEntries = entriesRef.current, updatedWinne
   };
 
   const simulateChat = () => {
-    const min = parseInt(minNum, 10) || 1, max = parseInt(maxNum, 10) || 50;
+    const max = parseInt(maxNum, 10) || 50;
     const available = [];
-    for (let i = min; i <= max; i++) if (!entriesRef.current[i]) available.push(i);
+    for (let i = minNum; i <= max; i++) if (!entriesRef.current[i]) available.push(i);
     if (available.length === 0) return alert("Sorteio cheio!");
     
     const randomNum = available[Math.floor(Math.random() * available.length)];
@@ -305,15 +295,14 @@ const broadcastUpdate = async (updatedEntries = entriesRef.current, updatedWinne
 
   if (!isOwner) return <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}><h2 style={{ color: 'var(--headline)' }}>Verificando credenciais...</h2></div>;
 
-  const minParsed = parseInt(minNum, 10) || 1, maxParsed = parseInt(maxNum, 10) || 50;
+  const maxParsed = parseInt(maxNum, 10) || 50;
   
   const segurasContagem = typeof entries === 'object' && entries !== null ? entries : {};
-  const totalNumbers = maxParsed - minParsed + 1;
+  const totalNumbers = maxParsed - minNum + 1;
   const takenCount = Object.keys(segurasContagem).length;
   
-  const gridArray = Array.from({ length: totalNumbers > 0 ? totalNumbers : 0 }, (_, i) => minParsed + i);
+  const gridArray = Array.from({ length: totalNumbers > 0 ? totalNumbers : 0 }, (_, i) => minNum + i);
 
-  // CSS dinâmico para o Select (Fica cinza se estiver conectado)
   const selectStyle = {
     width: '100%', 
     padding: '14px', 
@@ -331,6 +320,18 @@ const broadcastUpdate = async (updatedEntries = entriesRef.current, updatedWinne
   return (
     <div className="layout-container">
       <aside className="ad-sidebar"><AdBlock slot="ADS_ESQUERDA" /></aside>
+
+      {/* RENDERIZAÇÃO DO TOAST AQUI */}
+      {toast.show && (
+        <div style={{
+          position: 'fixed', top: '20px', right: '20px', zIndex: 9999,
+          backgroundColor: '#10b981', color: 'white', padding: '12px 24px',
+          borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          fontWeight: '600', fontFamily: 'Inter', animation: 'fadeIn 0.3s ease'
+        }}>
+          {toast.message}
+        </div>
+      )}
 
       <div className="app-content">
         <header>
@@ -358,7 +359,7 @@ const broadcastUpdate = async (updatedEntries = entriesRef.current, updatedWinne
                   value={targetAudience} 
                   onChange={(e) => setTargetAudience(e.target.value)} 
                   style={selectStyle}
-                  disabled={connected} // TRAVADO DURANTE O CHAT
+                  disabled={connected}
                 >
                   <option value="all">Todos (Livres)</option>
                   <option value="subs">Somente Inscritos (Subs)</option>
@@ -382,14 +383,16 @@ const broadcastUpdate = async (updatedEntries = entriesRef.current, updatedWinne
                   placeholder="https://exemplo.com/imagem.png"
                   value={itemImage} 
                   onChange={(e) => setItemImage(e.target.value)} 
-                  disabled={connected} // TRAVADO DURANTE O CHAT
+                  disabled={connected}
                 />
               </div>
 
-              <div className="input-row">
-                <div><label>Mín</label><input type="number" value={minNum} onChange={(e) => setMinNum(e.target.value)} disabled={connected} /></div>
-                <div><label>Máx</label><input type="number" value={maxNum} onChange={(e) => setMaxNum(e.target.value)} disabled={connected} /></div>
+              {/* INPUT DO MÍNIMO REMOVIDO! Apenas o Máximo ficou aqui */}
+              <div>
+                <label>Quantidade de Números (Máx)</label>
+                <input type="number" value={maxNum} onChange={(e) => setMaxNum(e.target.value)} disabled={connected} />
               </div>
+              
               <div><label>Comando</label><input type="text" value={command} onChange={(e) => setCommand(e.target.value)} /></div>
               
               <button className={`btn ${connected ? 'btn-danger' : 'btn-primary'}`} onClick={toggleConnect}>{connected ? '■ DESCONECTAR' : '▶ CONECTAR'}</button>
