@@ -16,7 +16,7 @@ const server = http.createServer(app);
 // Configuração do Socket.io permitindo o frontend conectar
 const io = new Server(server, {
   cors: {
-    origin: 'https://twitchgiveaways-production.up.railway.app/', // Em produção, coloque a URL do seu frontend (ex: http://lhttps://twitchgiveaways-production.up.railway.app/)
+    origin: 'https://twitchgiveaways-production.up.railway.app', // Em produção, coloque a URL do seu frontend (ex: http://lhttps://twitchgiveaways-production.up.railway.app/)
     methods: ['GET', 'POST'],
   },
 });
