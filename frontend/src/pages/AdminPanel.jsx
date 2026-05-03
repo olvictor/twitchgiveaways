@@ -322,8 +322,30 @@ export default function AdminPanel() {
     broadcastUpdate({}, null, []);
   };
 
-  if (!isOwner) return <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}><h2 style={{ color: 'var(--headline)' }}>Verificando credenciais...</h2></div>;
-
+if (!isOwner) return (
+    <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '15px' }}>
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
+      <div style={{
+        width: '50px',
+        height: '50px',
+        border: '5px solid rgba(16, 185, 129, 0.2)', /* Fundo do anel verde clarinho */
+        borderLeftColor: '#10b981', /* Cor principal verde (destaque que vai girar) */
+        borderRadius: '50%',
+        animation: 'spin 1s linear infinite'
+      }}></div>
+      <h3 style={{ color: 'var(--paragraph)', fontFamily: 'Montserrat, sans-serif', fontSize: '16px', fontWeight: '500' }}>
+        Carregando painel...
+      </h3>
+    </div>
+  );
+  
   const maxParsed = parseInt(maxNum, 10) || 50;
   
   const segurasContagem = typeof entries === 'object' && entries !== null ? entries : {};
@@ -332,17 +354,23 @@ export default function AdminPanel() {
   
   const gridArray = Array.from({ length: totalNumbers > 0 ? totalNumbers : 0 }, (_, i) => minNum + i);
 
+  // Variáveis de bloqueio:
+  // hasWinner = true se já houver um vencedor. Bloqueia alterações gerais (como título e comando).
+  // isSettingsLocked = true se estiver conectado no chat OU se já houver um vencedor. Bloqueia os inputs estruturais.
+  const hasWinner = !!winner;
+  const isSettingsLocked = connected || hasWinner;
+
   const selectStyle = {
     width: '100%', 
     padding: '14px', 
-    backgroundColor: connected ? '#f5f5f5' : 'var(--secondary)', 
+    backgroundColor: isSettingsLocked ? '#f5f5f5' : 'var(--secondary)', 
     border: '1px solid #dcdcdc', 
     borderRadius: '8px', 
-    color: connected ? '#9ca3af' : 'var(--headline)', 
+    color: isSettingsLocked ? '#9ca3af' : 'var(--headline)', 
     fontWeight: '600', 
     fontFamily: 'Inter', 
     outline: 'none',
-    cursor: connected ? 'not-allowed' : 'pointer',
+    cursor: isSettingsLocked ? 'not-allowed' : 'pointer',
     appearance: 'auto'
   };
 
@@ -407,7 +435,8 @@ export default function AdminPanel() {
           <div className="panel panel-config">
             <div className="panel-header">⚙ Configuração</div>
             <div className="config-body">
-              <div><label>Título</label><input type="text" value={title} onChange={(e) => setTitle(e.target.value)} /></div>
+              {/* Desativa o título se já houver ganhador */}
+              <div><label>Título</label><input type="text" value={title} onChange={(e) => setTitle(e.target.value)} disabled={hasWinner} /></div>
               
               <div className="divider" style={{ margin: '5px 0' }}></div>
               <div>
@@ -416,7 +445,7 @@ export default function AdminPanel() {
                   value={targetAudience} 
                   onChange={(e) => setTargetAudience(e.target.value)} 
                   style={selectStyle}
-                  disabled={connected}
+                  disabled={isSettingsLocked}
                 >
                   <option value="all">Todos (Livres)</option>
                   <option value="subs">Somente Inscritos (Subs)</option>
@@ -427,7 +456,7 @@ export default function AdminPanel() {
               {targetAudience === 'sub_bonus' && (
                 <div style={{ backgroundColor: '#fff0e6', padding: '15px', borderRadius: '8px', border: '1px solid #ffb17a' }}>
                   <label style={{ color: '#b1561c', marginBottom: '8px' }}>🚀 Multiplicador de Chances (Subs)</label>
-                  <input type="number" min="2" max="100" value={subMultiplier} onChange={(e) => setSubMultiplier(e.target.value)} placeholder="Ex: 3" disabled={connected} />
+                  <input type="number" min="2" max="100" value={subMultiplier} onChange={(e) => setSubMultiplier(e.target.value)} placeholder="Ex: 3" disabled={isSettingsLocked} />
                   <div style={{ fontSize: '11px', color: '#b1561c', marginTop: '8px', fontWeight: '500' }}>Subs terão seu número multiplicado na urna de sorteio.</div>
                 </div>
               )}
@@ -440,23 +469,27 @@ export default function AdminPanel() {
                   placeholder="https://exemplo.com/imagem.png"
                   value={itemImage} 
                   onChange={(e) => setItemImage(e.target.value)} 
-                  disabled={connected}
+                  disabled={isSettingsLocked}
                 />
               </div>
 
               <div>
                 <label>Quantidade de Números (Máx)</label>
-                <input type="number" value={maxNum} onChange={(e) => setMaxNum(e.target.value)} disabled={connected} />
+                <input type="number" value={maxNum} onChange={(e) => setMaxNum(e.target.value)} disabled={isSettingsLocked} />
               </div>
               
-              <div><label>Comando</label><input type="text" value={command} onChange={(e) => setCommand(e.target.value)} /></div>
+              {/* Desativa o comando se já houver ganhador */}
+              <div><label>Comando</label><input type="text" value={command} onChange={(e) => setCommand(e.target.value)} disabled={hasWinner} /></div>
               
               <button className={`btn ${connected ? 'btn-danger' : 'btn-primary'}`} onClick={toggleConnect}>{connected ? '■ DESCONECTAR' : '▶ CONECTAR'}</button>
-              {/* <div className="divider"></div>
-              <button className="btn" onClick={simulateChat} style={{ backgroundColor: '#e5e7eb', color: '#374151' }}>🤖 SIMULAR</button>
-              <div className="divider"></div> */}
+              <div className="divider"></div>
               
-              <button className="btn btn-success" onClick={drawWinner} disabled={takenCount === 0} style={{ backgroundColor: '#10b981', color: 'white' }}>🎲 SORTEAR</button>
+              {/* Desativa o botão de Simular se já houver ganhador */}
+              <button className="btn" onClick={simulateChat} disabled={hasWinner} style={{ backgroundColor: '#e5e7eb', color: '#374151', cursor: hasWinner ? 'not-allowed' : 'pointer', opacity: hasWinner ? 0.6 : 1 }}>🤖 SIMULAR</button>
+              <div className="divider"></div>
+              
+              {/* Desativa o botão de Sortear se já houver ganhador ou não houver participantes */}
+              <button className="btn btn-success" onClick={drawWinner} disabled={takenCount === 0 || hasWinner} style={{ backgroundColor: '#10b981', color: 'white', cursor: (takenCount === 0 || hasWinner) ? 'not-allowed' : 'pointer', opacity: (takenCount === 0 || hasWinner) ? 0.6 : 1 }}>🎲 SORTEAR</button>
               <button className="btn btn-danger" onClick={resetRaffle}>↺ RESETAR</button>
             </div>
           </div>
@@ -511,7 +544,7 @@ export default function AdminPanel() {
                         setFilterStart('');
                         setFilterEnd('');
                       }}
-                      style={{ width: 'auto', padding: '6px 16px', fontSize: '12px', backgroundColor: '#ef4444' }}
+                      style={{ width: 'auto', padding: '6px 16px', fontSize: '12px', backgroundColor: '#ef4444', color: '#fff' }}
                     >
                       ✖ MOSTRAR TODOS
                     </button>

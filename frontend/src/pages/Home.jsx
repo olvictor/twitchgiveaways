@@ -121,7 +121,7 @@ export default function Home() {
 
             <div className="panel">
               <div className="panel-header">
-                📊 Seus Sorteios
+                 Seus Sorteios
                 <span className="badge">{myRaffles.length} criados</span>
               </div>
               
