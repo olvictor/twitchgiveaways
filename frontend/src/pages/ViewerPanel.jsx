@@ -205,15 +205,32 @@ export default function ViewerPanel() {
 
       <aside className="ad-sidebar"><AdBlock slot="ADS_DIREITA" /></aside>
 
-      {showModal && (
-       <div id="winnerModal">
-          <div className="winner-card" style={{ height: '80vh', maxHeight: '80vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+       {showModal && (
+        <div 
+          id="winnerModal" 
+          onClick={() => setShowModal(false)}
+        >
+          <div 
+            className="winner-card" 
+            onClick={(e) => e.stopPropagation()} 
+            style={{ 
+              maxHeight: '80vh', 
+              overflowY: 'auto', 
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
             
-            <video ref={videoRef} className="modal-video" src="/caramelo.mp4" playsInline={true} />
+            <video 
+              ref={videoRef} 
+              className="modal-video" 
+              src="/caramelo.mp4" 
+              playsInline={true} 
+              style={{ maxHeight: '30vh', width: '100%', objectFit: 'contain' }} 
+            />
 
             <div className="case-header">🎁 Sorteando...</div>
             <div className="case-container">
-              {/* O TEMPO DE ANIMAÇÃO 13s */}
               <div className={`case-track ${showResult ? 'finished' : ''}`} style={{ transform: `translateX(${trackOffset})`, transition: isTransitioning ? 'transform 13s cubic-bezier(0.1, 0, 0.1, 1)' : 'none' }}>
                 {caseItems.map((item, i) => (
                   <div key={i} className={`case-item ${showResult && i === 100 ? 'winner-item' : ''}`}>{item.num}<span>@{item.user}</span></div>
@@ -221,11 +238,28 @@ export default function ViewerPanel() {
               </div>
               <div className={`case-pointer ${isSpinning ? 'ticking' : ''}`}></div>
             </div>
-            {showResult && (
+             {showResult && (
               <div className="winner-result">
                 <div className="winner-crown">👑</div>
-                <div className="winner-number">{winner?.num}</div>
-                <div className="winner-name">@{winner?.user}</div>
+                
+                <div className="winner-number" style={{ fontSize: '1rem', margin: '10px 0' }}>
+                  {winner?.num}
+                </div>
+                
+                <div className="winner-name" style={{ fontSize: '2rem', fontWeight: 'bold' }}>
+                  @{winner?.user}
+                </div>
+                
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                  <button 
+                    className="btn btn-primary" 
+                    onClick={() => setShowModal(false)} 
+                    style={{ width: 'auto', padding: '12px 40px' }}
+                  >
+                    FECHAR
+                  </button>
+                </div>
+
               </div>
             )}
           </div>

@@ -512,12 +512,28 @@ export default function AdminPanel() {
               </div>
               <div className={`case-pointer ${isSpinning ? 'ticking' : ''}`}></div>
             </div>
-            {showResult && (
+           {showResult && (
               <div className="winner-result">
                 <div className="winner-crown">👑</div>
-                <div className="winner-number">{winner?.num}</div>
-                <div className="winner-name">@{winner?.user}</div>
-                <button className="btn btn-primary" onClick={() => setShowModal(false)} style={{ width: 'auto', padding: '12px 30px' }}>FECHAR</button>
+                
+                <div className="winner-number" style={{ fontSize: '1rem', margin: '10px 0' }}>
+                  {winner?.num}
+                </div>
+                
+                <div className="winner-name" style={{ fontSize: '2rem', fontWeight: 'bold' }}>
+                  @{winner?.user}
+                </div>
+                
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                  <button 
+                    className="btn btn-primary" 
+                    onClick={() => setShowModal(false)} 
+                    style={{ width: 'auto', padding: '12px 40px' }}
+                  >
+                    FECHAR
+                  </button>
+                </div>
+
               </div>
             )}
           </div>
