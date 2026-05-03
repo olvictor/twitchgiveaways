@@ -43,6 +43,17 @@ export default function ViewerPanel() {
     isModalOpenRef.current = showModal;
   }, [showModal]);
 
+
+  useEffect(() => {
+      const handleEsc = (e) => {
+        if (e.key === 'Escape' && showModal) {
+          setShowModal(false);
+        }
+      };
+      window.addEventListener('keydown', handleEsc);
+      return () => window.removeEventListener('keydown', handleEsc);
+    }, [showModal]);
+
   const parseSeguro = (v, d) => (v && v !== 'null') ? (typeof v === 'string' ? JSON.parse(v) : v) : d;
 
   useEffect(() => {
@@ -149,6 +160,9 @@ export default function ViewerPanel() {
   return (
     <div className="layout-container">
       <aside className="ad-sidebar"><AdBlock slot="ADS_ESQUERDA" /></aside>
+       {/* Pré-carregamento do vídeo escondido na página */}
+      <video src="/caramelo.mp4" preload="auto" style={{ display: 'none' }} />
+
 
       <div className="app-content">
         <header style={{ justifyContent: 'center' }}>

@@ -33,7 +33,11 @@ export default function AdminPanel() {
   const [isSpinning, setIsSpinning] = useState(false); 
   const [showResult, setShowResult] = useState(false);
 
-  // Estado para controlar o Toast (Notificação)
+
+  const [filterStart, setFilterStart] = useState('');
+  const [filterEnd, setFilterEnd] = useState('');
+  const [isFiltering, setIsFiltering] = useState(false);
+
   const [toast, setToast] = useState({ show: false, message: '' });
 
   const wsTwitch = useRef(null);
@@ -46,12 +50,10 @@ export default function AdminPanel() {
 
   const linkPublico = `${window.location.origin}/sorteio/${id}`;
 
-  // 1º useEffect: Rola o chat para baixo quando chega mensagem nova
   useEffect(() => {
     if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
   }, [chatLogs]);
 
-  // 2º useEffect: Ouve a tecla ESC para fechar o Modal
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === 'Escape' && showModal) {
@@ -441,17 +443,66 @@ export default function AdminPanel() {
               </div>
             )}
 
-            <div className="panel-header">🎯 Números do Sorteio <span className="badge">{takenCount} escolhidos</span></div>
+           <div className="panel-header">🎯 Números do Sorteio <span className="badge">{takenCount} escolhidos</span></div>
             <div className="grid-body">
               {targetAudience === 'subs' && <div style={{ backgroundColor: '#e0f2fe', color: '#0369a1', padding: '10px', borderRadius: '8px', textAlign: 'center', fontWeight: '700', fontSize: '13px', marginBottom: '10px' }}>🔒 ESTE SORTEIO É EXCLUSIVO PARA INSCRITOS (SUBS)</div>}
               {targetAudience === 'sub_bonus' && <div style={{ backgroundColor: '#fce7f3', color: '#be185d', padding: '10px', borderRadius: '8px', textAlign: 'center', fontWeight: '700', fontSize: '13px', marginBottom: '10px' }}>🎁 SUBS TÊM {subMultiplier}X MAIS CHANCES DE GANHAR!</div>}
 
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px' }}>
-                <h2 style={{ fontSize: '38px', fontFamily: 'Bebas Neue', color: 'var(--headline)', letterSpacing: '1px' }}>{title}</h2>
+                <h2 style={{ fontSize: '38px', fontFamily: 'Bebas Neue', color: 'var(--headline)', letterSpacing: '1px', marginBottom: '15px' }}>{title}</h2>
+                
+                {/* --- BARRA DE FILTRO --- */}
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', backgroundColor: '#f9fafb', padding: '10px 15px', borderRadius: '8px', border: '1px solid #e5e7eb', flexWrap: 'wrap', justifyContent: 'center' }}>
+                  <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--paragraph)' }}>Filtrar números:</span>
+                  <input 
+                    type="number" 
+                    placeholder="De (ex: 20)" 
+                    value={filterStart} 
+                    onChange={(e) => setFilterStart(e.target.value)}
+                    style={{ width: '90px', padding: '6px', borderRadius: '6px', border: '1px solid #dcdcdc', outline: 'none' }}
+                  />
+                  <span style={{ fontWeight: 'bold', color: 'var(--paragraph)' }}>-</span>
+                  <input 
+                    type="number" 
+                    placeholder="Até (ex: 30)" 
+                    value={filterEnd} 
+                    onChange={(e) => setFilterEnd(e.target.value)}
+                    style={{ width: '90px', padding: '6px', borderRadius: '6px', border: '1px solid #dcdcdc', outline: 'none' }}
+                  />
+                  
+                  <button 
+                    className="btn btn-primary" 
+                    onClick={() => setIsFiltering(true)}
+                    style={{ width: 'auto', padding: '6px 16px', fontSize: '12px' }}
+                  >
+                    🔍 FILTRAR
+                  </button>
+                  
+                  {/* O botão 'Mostrar Todos' só aparece se o filtro estiver ativo */}
+                  {isFiltering && (
+                    <button 
+                      className="btn btn-danger" 
+                      onClick={() => {
+                        setIsFiltering(false);
+                        setFilterStart('');
+                        setFilterEnd('');
+                      }}
+                      style={{ width: 'auto', padding: '6px 16px', fontSize: '12px', backgroundColor: '#ef4444' }}
+                    >
+                      ✖ MOSTRAR TODOS
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div id="numbersGrid">
-                {gridArray.map((num) => {
+                {/* Aplicando o filtro antes de mapear os números */}
+                {gridArray.filter(num => {
+                  if (!isFiltering) return true;
+                  const start = parseInt(filterStart, 10) || 1;
+                  const end = parseInt(filterEnd, 10) || maxParsed;
+                  return num >= start && num <= end;
+                }).map((num) => {
                   const isTaken = !!entries[num], isWinner = winner?.num === num;
                   const userSubBadge = isTaken && subList.includes(entries[num]) ? '🌟 ' : '';
                   return (
