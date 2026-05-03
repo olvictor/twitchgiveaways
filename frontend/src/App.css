@@ -32,6 +32,26 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0;
 }
 
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+/* 3. Forçando a Montserrat em todos os títulos e textos de destaque */
+h1, h2, h3, h4, h5, h6, 
+.logo-text, 
+.panel-header, 
+.case-header, 
+.winner-name, 
+.badge,
+button {
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* Opcional: Se quiser que os números da grid também usem a fonte dos títulos (fica bem legal) */
+.num-value {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+}
 header {
   display: flex;
   justify-content: space-between;
