@@ -103,12 +103,41 @@ export default function AdminPanel() {
     };
   }, [id, navigate]);
 
-  const broadcastUpdate = (updatedEntries = entriesRef.current, updatedWinner = winner, updatedSubList = subListRef.current) => {
+const broadcastUpdate = async (updatedEntries = entriesRef.current, updatedWinner = winner, updatedSubList = subListRef.current) => {
+    // 1. Atualiza a tela dos espectadores em tempo real via Socket.io
     if (socketBackend.current) {
       socketBackend.current.emit('admin_update', {
         id, channel, title, minNum, maxNum, command, itemImage, entries: updatedEntries, winner: updatedWinner,
         targetAudience, subMultiplier, subList: updatedSubList
       });
+    }
+
+    // 2. Salva as alterações definitivamente no Banco de Dados
+    try {
+      const token = localStorage.getItem('twitch_token');
+      if (!token) return; // Garante que o usuário está logado
+
+      await fetch(`https://twitchgiveaways-production-562e.up.railway.app/api/raffles/${id}`, {
+        method: 'PUT', // Atualiza os dados da rifa existente
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // Envia o token por segurança
+        },
+        body: JSON.stringify({
+          title: title,
+          min_num: parseInt(minNum, 10),
+          max_num: parseInt(maxNum, 10),
+          command: command,
+          item_image: itemImage,
+          target_audience: targetAudience,
+          sub_multiplier: parseInt(subMultiplier, 10),
+          entries: updatedEntries,
+          winner: updatedWinner,
+          sub_list: updatedSubList
+        })
+      });
+    } catch (error) {
+      console.error("Erro ao salvar as configurações no banco de dados:", error);
     }
   };
 
