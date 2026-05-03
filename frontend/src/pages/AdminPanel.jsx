@@ -50,6 +50,17 @@ export default function AdminPanel() {
     if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
   }, [chatLogs]);
 
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape' && showModal) {
+        setShowModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [showModal]);
+
+  
   const parseSeguro = (valor, valorPadrao) => {
     if (!valor || valor === 'null') return valorPadrao;
     if (typeof valor === 'string') {
@@ -324,7 +335,10 @@ export default function AdminPanel() {
       {/* RENDERIZAÇÃO DO TOAST AQUI */}
       {toast.show && (
         <div style={{
-          position: 'fixed', top: '20px', right: '20px', zIndex: 9999,
+          position: 'fixed', 
+          bottom: '20px', /* Mudou de top para bottom */
+          left: '20px',   /* Mudou de right para left */
+          zIndex: 9999,
           backgroundColor: '#10b981', color: 'white', padding: '12px 24px',
           borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
           fontWeight: '600', fontFamily: 'Inter', animation: 'fadeIn 0.3s ease'
@@ -332,7 +346,6 @@ export default function AdminPanel() {
           {toast.message}
         </div>
       )}
-
       <div className="app-content">
         <header>
           <div className="logo"><span className="logo-text">TWITCH SORTEIO ADMIN</span></div>
@@ -449,11 +462,30 @@ export default function AdminPanel() {
       </div>
       <aside className="ad-sidebar"><AdBlock slot="ADS_DIREITA" /></aside>
 
-      {showModal && (
-        <div id="winnerModal">
-          <div className="winner-card">
+   {showModal && (
+        <div 
+          id="winnerModal" 
+          onClick={() => setShowModal(false)} // Fecha se clicar na parte escura (fora)
+        >
+          <div 
+            className="winner-card" 
+            onClick={(e) => e.stopPropagation()} // Impede o clique de vazar e fechar o modal ao clicar dentro da caixa branca
+            style={{ 
+              maxHeight: '80vh', // Trava a altura máxima em 80% da tela
+              overflowY: 'auto', // Se os itens passarem, ele cria um scroll automático dentro do card
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
             
-            <video ref={videoRef} className="modal-video" src="/caramelo.mp4" playsInline={true} />
+            {/* Travei a altura máxima do vídeo para garantir que ele não roube todo o espaço */}
+            <video 
+              ref={videoRef} 
+              className="modal-video" 
+              src="/caramelo.mp4" 
+              playsInline={true} 
+              style={{ maxHeight: '30vh', width: '100%', objectFit: 'contain' }} 
+            />
 
             <div className="case-header">🎁 Sorteando...</div>
             <div className="case-container">
@@ -464,6 +496,7 @@ export default function AdminPanel() {
               </div>
               <div className={`case-pointer ${isSpinning ? 'ticking' : ''}`}></div>
             </div>
+            
             {showResult && (
               <div className="winner-result">
                 <div className="winner-crown">👑</div>
