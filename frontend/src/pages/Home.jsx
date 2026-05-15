@@ -111,13 +111,13 @@ export default function Home() {
               LOGAR COM TWITCH
             </button>
 
-            <button 
+            {/* <button 
               className="btn" 
               onClick={loginComKick} 
               style={{ width: '260px', padding: '16px', fontSize: '15px', backgroundColor: '#53FC18', color: '#000', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontWeight: 'bold' }}
             >
               LOGAR COM KICK
-            </button>
+            </button> */}
           </div>
         ) : (
           <div style={{ width: '100%', maxWidth: '650px', display: 'flex', flexDirection: 'column', gap: '25px' }}>
