@@ -3,8 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import AdBlock from '../components/AdBlock';
 
-// URL centralizada! 
-const BACKEND_URL = 'https://twitchgiveaways-production-562e.up.railway.app';
+// URL centralizada e dinâmica! 
+// Ele tenta pegar da variável de ambiente. Se não existir, usa o localhost para testes.
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -53,6 +54,10 @@ export default function Home() {
     window.location.href = `${BACKEND_URL}/api/auth/twitch`;
   };
 
+  const loginComKick = () => {
+    window.location.href = `${BACKEND_URL}/api/auth/kick`;
+  };
+
   const logout = () => { 
     localStorage.removeItem('twitch_token'); 
     setUser(null); 
@@ -87,19 +92,33 @@ export default function Home() {
       <div className="app-content" style={{ alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <h1 style={{ fontFamily: 'Bebas Neue', fontSize: '64px', letterSpacing: '2px', color: 'var(--headline)' }}>
-            TWITCH SORTEIOS
+            PAINEL DE SORTEIOS
           </h1>
           <p style={{ fontWeight: '500', color: 'var(--paragraph)', marginTop: '10px', fontSize: '16px' }}>Gerencie seus sorteios interativos</p>
         </div>
         
         {!user ? (
-          <button className="btn btn-primary" onClick={loginComTwitch} style={{ width: '300px', padding: '16px', fontSize: '15px' }}>
-            <svg style={{ width: '22px' }} viewBox="0 0 24 24" fill="#fff">
-              <path d="M4.3 3L3 6.6v14h5V23h3.1l2.5-2.5h3.8l5-5V3H4.3zm15.3 13l-3.1 3h-4.6L9.4 21.5V19H5.5V5h14.1v11z" />
-              <path d="M15.5 8h1.8v5h-1.8zm-4.7 0h1.8v5h-1.8z" />
-            </svg>
-            LOGAR COM A TWITCH
-          </button>
+          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <button 
+              className="btn" 
+              onClick={loginComTwitch} 
+              style={{ width: '260px', padding: '16px', fontSize: '15px', backgroundColor: '#9146FF', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+            >
+              <svg style={{ width: '22px' }} viewBox="0 0 24 24" fill="#fff">
+                <path d="M4.3 3L3 6.6v14h5V23h3.1l2.5-2.5h3.8l5-5V3H4.3zm15.3 13l-3.1 3h-4.6L9.4 21.5V19H5.5V5h14.1v11z" />
+                <path d="M15.5 8h1.8v5h-1.8zm-4.7 0h1.8v5h-1.8z" />
+              </svg>
+              LOGAR COM TWITCH
+            </button>
+
+            <button 
+              className="btn" 
+              onClick={loginComKick} 
+              style={{ width: '260px', padding: '16px', fontSize: '15px', backgroundColor: '#53FC18', color: '#000', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontWeight: 'bold' }}
+            >
+              LOGAR COM KICK
+            </button>
+          </div>
         ) : (
           <div style={{ width: '100%', maxWidth: '650px', display: 'flex', flexDirection: 'column', gap: '25px' }}>
             
@@ -107,7 +126,9 @@ export default function Home() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
                 <img src={user.profile_image} alt="Avatar" style={{ width: '55px', borderRadius: '50%', border: '2px solid #e0e0e0' }} />
                 <div>
-                  <div style={{ fontSize: '13px', color: 'var(--paragraph)', fontWeight: '500' }}>Bem-vindo de volta,</div>
+                  <div style={{ fontSize: '13px', color: 'var(--paragraph)', fontWeight: '500' }}>
+                    Bem-vindo de volta, <span style={{ backgroundColor: user.platform === 'KICK' ? '#53FC18' : '#9146FF', color: user.platform === 'KICK' ? '#000' : '#fff', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', marginLeft: '5px' }}>{user.platform || 'TWITCH'}</span>
+                  </div>
                   <div style={{ fontWeight: '700', fontSize: '19px', color: 'var(--headline)' }}>{user.display_name}</div>
                   <button onClick={logout} style={{ background: 'none', border: 'none', color: 'var(--paragraph)', cursor: 'pointer', fontSize: '12px', padding: 0, textDecoration: 'underline', marginTop: '6px', fontWeight: '500' }}>
                     Sair (Logout)

@@ -495,8 +495,8 @@ if (!isOwner) return (
               <div className="divider"></div>
               
               {/* Desativa o botão de Simular se já houver ganhador */}
-              <button className="btn" onClick={simulateChat} disabled={hasWinner} style={{ backgroundColor: '#e5e7eb', color: '#374151', cursor: hasWinner ? 'not-allowed' : 'pointer', opacity: hasWinner ? 0.6 : 1 }}>🤖 SIMULAR</button>
-              <div className="divider"></div>
+              {/* <button className="btn" onClick={simulateChat} disabled={hasWinner} style={{ backgroundColor: '#e5e7eb', color: '#374151', cursor: hasWinner ? 'not-allowed' : 'pointer', opacity: hasWinner ? 0.6 : 1 }}>🤖 SIMULAR</button>
+              <div className="divider"></div> */}
               
               {/* Desativa o botão de Sortear se já houver ganhador ou não houver participantes */}
               <button className="btn btn-success" onClick={drawWinner} disabled={takenCount === 0 || hasWinner} style={{ backgroundColor: '#10b981', color: 'white', cursor: (takenCount === 0 || hasWinner) ? 'not-allowed' : 'pointer', opacity: (takenCount === 0 || hasWinner) ? 0.6 : 1 }}>🎲 SORTEAR</button>
