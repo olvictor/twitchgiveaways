@@ -1,5 +1,6 @@
 const { Pool } = require('pg');
 require('dotenv').config();
+
 // CONFIGURAÇÃO PARA O RAILWAY (PRODUÇÃO)
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
