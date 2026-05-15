@@ -13,10 +13,13 @@ app.use(express.json());
 
 const server = http.createServer(app);
 
-// Configuração do Socket.io permitindo o frontend conectar
+// Define dinamicamente a URL do Frontend (Localhost para testes, Railway para produção)
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+// Configuração do Socket.io permitindo o frontend conectar (agora usa a URL dinâmica)
 const io = new Server(server, {
   cors: {
-    origin: 'https://twitchgiveaways-production.up.railway.app', // Em produção, coloque a URL do seu frontend (ex: http://lhttps://twitchgiveaways-production.up.railway.app/)
+    origin: FRONTEND_URL, 
     methods: ['GET', 'POST'],
   },
 });
@@ -34,15 +37,16 @@ const authenticateToken = (req, res, next) => {
     next();
   });
 };
-// --- AUTENTICAÇÃO TWITCH ---
 
-// 1. O usuário clica em "Logar" e o React chama essa rota, que redireciona para a Twitch
+// ==========================================
+// --- AUTENTICAÇÃO TWITCH ---
+// ==========================================
+
 app.get('/api/auth/twitch', (req, res) => {
   const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${process.env.TWITCH_CLIENT_ID}&redirect_uri=${process.env.TWITCH_REDIRECT_URI}&response_type=code&scope=user:read:email`;
   res.redirect(twitchAuthUrl);
 });
 
-// 2. A Twitch devolve o usuário para cá com um "código"
 app.get('/api/auth/twitch/callback', async (req, res) => {
   const { code } = req.query;
   try {
@@ -68,36 +72,174 @@ app.get('/api/auth/twitch/callback', async (req, res) => {
     const twitchUser = userResponse.data.data[0];
 
     const userToken = jwt.sign(
-      { id: twitchUser.id, username: twitchUser.login, display_name: twitchUser.display_name, profile_image: twitchUser.profile_image_url },
+      { id: twitchUser.id, username: twitchUser.login, display_name: twitchUser.display_name, profile_image: twitchUser.profile_image_url, platform: 'TWITCH' },
       process.env.JWT_SECRET,
       { expiresIn: '7d' } 
     );
 
-    // O redirecionamento final com a URL do React cravada no código
-    res.redirect(`https://twitchgiveaways-production.up.railway.app/?token=${userToken}`);
-    
+    // Redireciona de volta para o FRONTEND_URL dinâmico
+    res.redirect(`${FRONTEND_URL}/?token=${userToken}`);
     
   } catch (error) {
     console.error('Erro na autenticação com a Twitch:', error);
-    // Erro
-    res.redirect(`https://twitchgiveaways-production.up.railway.app/?error=auth_failed`);
+    res.redirect(`${FRONTEND_URL}/?error=auth_failed`);
   }
 });
 
-// --- ROTAS REST (Express) ---
+// ==========================================
+// --- AUTENTICAÇÃO KICK ---
+// ==========================================
 
+app.get('/api/auth/kick', (req, res) => {
 
-app.get('/api/raffles/user/me', authenticateToken, async (req, res) => {
-  const twitchUsername = req.user.username; // Pega o nome do token validado
+  const params = new URLSearchParams({
+    client_id: process.env.KICK_CLIENT_ID,
+    redirect_uri: process.env.KICK_REDIRECT_URI,
+    response_type: 'code'
+  });
+
+  const authUrl =
+    `https://id.kick.com/oauth/authorize?${params.toString()}`;
+
+  console.log('URL OAUTH:', authUrl);
+
+  res.redirect(authUrl);
+});
+
+/*
+|--------------------------------------------------------------------------
+| CALLBACK KICK
+|--------------------------------------------------------------------------
+*/
+
+app.get('/api/auth/kick/callback', async (req, res) => {
+
+  const { code } = req.query;
+
+  const FRONTEND_URL =
+    process.env.FRONTEND_URL || 'http://localhost:5173';
+
+  if (!code) {
+    return res.redirect(
+      `${FRONTEND_URL}/?error=no_code`
+    );
+  }
 
   try {
-    // Busca todos os sorteios desse canal, ordenando por data de criação (mais novos primeiro)
+
+    /*
+    |--------------------------------------------------------------------------
+    | TROCA CODE POR ACCESS TOKEN
+    |--------------------------------------------------------------------------
+    */
+
+    const tokenResponse = await axios.post(
+      'https://id.kick.com/oauth/token',
+
+      qs.stringify({
+        grant_type: 'authorization_code',
+        code: code,
+        client_id: process.env.KICK_CLIENT_ID,
+        client_secret: process.env.KICK_CLIENT_SECRET,
+        redirect_uri: process.env.KICK_REDIRECT_URI
+      }),
+
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+    );
+
+    console.log('TOKEN RESPONSE:', tokenResponse.data);
+
+    const accessToken = tokenResponse.data.access_token;
+
+    /*
+    |--------------------------------------------------------------------------
+    | BUSCA DADOS DO USUARIO
+    |--------------------------------------------------------------------------
+    */
+
+    const userResponse = await axios.get(
+      'https://api.kick.com/public/v1/users',
+
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: 'application/json'
+        }
+      }
+    );
+
+    console.log('USER RESPONSE:', userResponse.data);
+
+    const userData = userResponse.data.data?.[0];
+
+    if (!userData) {
+      throw new Error('Usuário não encontrado');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | GERA JWT DO SEU SISTEMA
+    |--------------------------------------------------------------------------
+    */
+
+    const userToken = jwt.sign(
+      {
+        id: userData.id,
+        username: userData.name,
+        display_name: userData.name,
+        profile_image: userData.profile_picture,
+        platform: 'KICK'
+      },
+
+      process.env.JWT_SECRET,
+
+      {
+        expiresIn: '7d'
+      }
+    );
+
+    /*
+    |--------------------------------------------------------------------------
+    | REDIRECIONA PARA FRONTEND
+    |--------------------------------------------------------------------------
+    */
+
+    res.redirect(
+      `${FRONTEND_URL}/?token=${userToken}`
+    );
+
+  } catch (error) {
+
+    console.error(
+      'ERRO OAUTH KICK:',
+      error.response?.data || error.message
+    );
+
+    res.redirect(
+      `${FRONTEND_URL}/?error=kick_auth_failed`
+    );
+  }
+});
+
+// ==========================================
+// --- ROTAS REST (Express) ---
+// ==========================================
+
+app.get('/api/raffles/user/me', authenticateToken, async (req, res) => {
+  const username = req.user.username; 
+  const platform = req.user.platform; 
+
+  try {
     const result = await pool.query(
-      `SELECT id, title, created_at, winner, item_image 
+      `SELECT id, title, created_at, winner, item_image, platform 
       FROM raffles 
-      WHERE channel = $1 
+      WHERE channel = $1 AND platform = $2
       ORDER BY created_at DESC`,
-      [twitchUsername]
+      [username, platform]
     );
     
     res.json(result.rows);
@@ -107,28 +249,25 @@ app.get('/api/raffles/user/me', authenticateToken, async (req, res) => {
   }
 });
 
-// 1. Criar um novo sorteio (Chamado pelo botão "CRIAR NOVO SORTEIO" no frontend)
 app.post('/api/raffles', authenticateToken, async (req, res) => {
   const { id } = req.body;
   
-  // Pegamos o nome da conta logada direto do token
-  const twitchUsername = req.user.username; 
+  const username = req.user.username; 
+  const platform = req.user.platform || 'TWITCH'; 
 
   try {
-    // Inserimos o id do sorteio e o nome do canal como dono
     await pool.query(
-      'INSERT INTO raffles (id, channel) VALUES ($1, $2)',
-      [id, twitchUsername]
+      'INSERT INTO raffles (id, channel, platform) VALUES ($1, $2, $3)',
+      [id, username, platform]
     );
     
-    res.status(201).json({ message: 'Sorteio criado com sucesso', id });
+    res.status(201).json({ message: 'Sorteio criado com sucesso', id, platform });
   } catch (error) {
     console.error('Erro ao criar sorteio:', error);
     res.status(500).json({ error: 'Erro ao salvar no banco de dados' });
   }
 });
 
-// 2. Buscar dados iniciais do sorteio (Chamado quando alguém abre a tela Admin ou Viewer)
 app.get('/api/raffles/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -143,19 +282,19 @@ app.get('/api/raffles/:id', async (req, res) => {
   }
 });
 
+// ==========================================
 // --- COMUNICAÇÃO EM TEMPO REAL (Socket.io) ---
+// ==========================================
 
 io.on('connection', (socket) => {
   console.log(`🔌 Novo usuário conectado: ${socket.id}`);
 
-  // Usuário (Admin ou Viewer) entra na "sala" exclusiva daquele UUID
   socket.on('join_raffle', (raffleId) => {
     socket.join(raffleId);
     console.log(`👤 Usuário entrou na sala do sorteio: ${raffleId}`);
   });
 
-  // Admin envia uma atualização (novo número, configuração alterada, vencedor sorteado)
- socket.on('admin_update', async (data) => {
+  socket.on('admin_update', async (data) => {
     const { id, channel, title, minNum, maxNum, command, entries, winner, itemImage, targetAudience, subMultiplier, subList } = data;
 
     try {
@@ -192,7 +331,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// --- INICIANDO SERVIDOR ---
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);

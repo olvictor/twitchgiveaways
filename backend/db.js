@@ -1,7 +1,5 @@
 const { Pool } = require('pg');
-
-console.log("DATABASE_URL:", !!process.env.DATABASE_URL);
-
+require('dotenv').config();
 // CONFIGURAÇÃO PARA O RAILWAY (PRODUÇÃO)
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -9,6 +7,17 @@ const pool = new Pool({
     rejectUnauthorized: false
   }
 });
+
+
+
+// const pool = new Pool({
+//   user: process.env.DB_USER,
+//   password: process.env.DB_PASSWORD,
+//   host: process.env.DB_HOST,
+//   port: process.env.DB_PORT,
+//   database: process.env.DB_NAME,
+//   ssl: false
+// });
 
 const initDB = async () => {
   const createTableQuery = `
@@ -33,6 +42,7 @@ const initDB = async () => {
     ALTER TABLE raffles ADD COLUMN IF NOT EXISTS target_audience VARCHAR(50) DEFAULT 'all';
     ALTER TABLE raffles ADD COLUMN IF NOT EXISTS sub_multiplier INT DEFAULT 2;
     ALTER TABLE raffles ADD COLUMN IF NOT EXISTS sub_list JSONB DEFAULT '[]';
+    ALTER TABLE raffles ADD COLUMN IF NOT EXISTS platform VARCHAR(50) DEFAULT 'TWITCH';
   `;
 
   try {
