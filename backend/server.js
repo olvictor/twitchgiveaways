@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -50,15 +51,24 @@ app.get('/api/auth/twitch', (req, res) => {
 app.get('/api/auth/twitch/callback', async (req, res) => {
   const { code } = req.query;
   try {
-    const tokenResponse = await axios.post('https://id.twitch.tv/oauth2/token', null, {
-      params: {
-        client_id: process.env.TWITCH_CLIENT_ID,
-        client_secret: process.env.TWITCH_CLIENT_SECRET,
-        code,
-        grant_type: 'authorization_code',
-        redirect_uri: process.env.TWITCH_REDIRECT_URI,
-      },
-    });
+    const tokenResponse = await axios.post(
+  'https://kick.com/api/v1/oauth/token',
+
+  qs.stringify({
+    grant_type: 'authorization_code',
+    code,
+    client_id: process.env.KICK_CLIENT_ID,
+    client_secret: process.env.KICK_CLIENT_SECRET,
+    redirect_uri: process.env.KICK_REDIRECT_URI,
+    code_verifier: global.codeVerifier
+  }),
+
+  {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  }
+);
 
     const accessToken = tokenResponse.data.access_token;
 
@@ -92,10 +102,24 @@ app.get('/api/auth/twitch/callback', async (req, res) => {
 
 app.get('/api/auth/kick', (req, res) => {
 
+  const codeVerifier = crypto
+    .randomBytes(32)
+    .toString('hex');
+
+  const codeChallenge = crypto
+    .createHash('sha256')
+    .update(codeVerifier)
+    .digest('base64url');
+
+  // salvar temporariamente
+  global.codeVerifier = codeVerifier;
+
   const params = new URLSearchParams({
     client_id: process.env.KICK_CLIENT_ID,
     redirect_uri: process.env.KICK_REDIRECT_URI,
-    response_type: 'code'
+    response_type: 'code',
+    code_challenge: codeChallenge,
+    code_challenge_method: 'S256'
   });
 
   const authUrl =
@@ -105,7 +129,6 @@ app.get('/api/auth/kick', (req, res) => {
 
   res.redirect(authUrl);
 });
-
 /*
 |-------------------------------------------------------------------------
 | CALLBACK KICK
