@@ -99,9 +99,9 @@ app.get('/api/auth/kick', (req, res) => {
   });
 
   const authUrl =
-    `https://id.kick.com/oauth/authorize?${params.toString()}`;
+    `https://kick.com/oauth/authorize?${params.toString()}`;
 
-  console.log('URL OAUTH:', authUrl);
+  console.log(authUrl);
 
   res.redirect(authUrl);
 });
@@ -134,7 +134,7 @@ app.get('/api/auth/kick/callback', async (req, res) => {
     */
 
     const tokenResponse = await axios.post(
-      'https://id.kick.com/oauth/token',
+      'https://kick.com/api/v1/oauth/token',
 
       qs.stringify({
         grant_type: 'authorization_code',
