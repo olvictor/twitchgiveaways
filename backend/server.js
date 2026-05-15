@@ -114,115 +114,11 @@ app.get('/api/auth/kick', (req, res) => {
 
 app.get('/api/auth/kick/callback', async (req, res) => {
 
-  const { code } = req.query;
+  console.log('CALLBACK KICK');
 
-  const FRONTEND_URL =
-    process.env.FRONTEND_URL || 'http://localhost:5173';
+  console.log(req.query);
 
-  if (!code) {
-    return res.redirect(
-      `${FRONTEND_URL}/?error=no_code`
-    );
-  }
-
-  try {
-
-    /*
-    |--------------------------------------------------------------------------
-    | TROCA CODE POR ACCESS TOKEN
-    |--------------------------------------------------------------------------
-    */
-
-    const tokenResponse = await axios.post(
-      'https://kick.com/api/v1/oauth/token',
-
-      qs.stringify({
-        grant_type: 'authorization_code',
-        code: code,
-        client_id: process.env.KICK_CLIENT_ID,
-        client_secret: process.env.KICK_CLIENT_SECRET,
-        redirect_uri: process.env.KICK_REDIRECT_URI
-      }),
-
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }
-    );
-
-    console.log('TOKEN RESPONSE:', tokenResponse.data);
-
-    const accessToken = tokenResponse.data.access_token;
-
-    /*
-    |--------------------------------------------------------------------------
-    | BUSCA DADOS DO USUARIO
-    |--------------------------------------------------------------------------
-    */
-
-    const userResponse = await axios.get(
-      'https://api.kick.com/public/v1/users',
-
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          Accept: 'application/json'
-        }
-      }
-    );
-
-    console.log('USER RESPONSE:', userResponse.data);
-
-    const userData = userResponse.data.data?.[0];
-
-    if (!userData) {
-      throw new Error('Usuário não encontrado');
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | GERA JWT DO SEU SISTEMA
-    |--------------------------------------------------------------------------
-    */
-
-    const userToken = jwt.sign(
-      {
-        id: userData.id,
-        username: userData.name,
-        display_name: userData.name,
-        profile_image: userData.profile_picture,
-        platform: 'KICK'
-      },
-
-      process.env.JWT_SECRET,
-
-      {
-        expiresIn: '7d'
-      }
-    );
-
-    /*
-    |--------------------------------------------------------------------------
-    | REDIRECIONA PARA FRONTEND
-    |--------------------------------------------------------------------------
-    */
-
-    res.redirect(
-      `${FRONTEND_URL}/?token=${userToken}`
-    );
-
-  } catch (error) {
-
-    console.error(
-      'ERRO OAUTH KICK:',
-      error.response?.data || error.message
-    );
-
-    res.redirect(
-      `${FRONTEND_URL}/?error=kick_auth_failed`
-    );
-  }
+  res.send(req.query);
 });
 
 // ==========================================
